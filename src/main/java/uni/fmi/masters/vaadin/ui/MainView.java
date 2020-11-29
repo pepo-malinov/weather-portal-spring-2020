@@ -8,6 +8,7 @@ import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -20,6 +21,8 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.PWA;
 
+import uni.fmi.masters.models.UserBean;
+import uni.fmi.masters.security.SecurityUtils;
 import uni.fmi.masters.vaadin.ui.comment.CommentsView;
 import uni.fmi.masters.vaadin.ui.user.UserView;
 
@@ -51,6 +54,8 @@ public class MainView extends AppLayout {
 		layout.add(new DrawerToggle());
 		viewTitle = new H1();
 		layout.add(viewTitle);
+		Anchor logout = new Anchor("logout", "Изход");
+		layout.add(logout);
 		layout.add(new Image("images/user.svg", "Avatar"));
 		return layout;
 	}
@@ -81,7 +86,15 @@ public class MainView extends AppLayout {
 	}
 
 	private Component[] createMenuItems() {
-		return new Tab[] { createTab("Потребители", UserView.class), createTab("Коментари", CommentsView.class) };
+		Tab[] tabs;
+		UserBean currentUser = SecurityUtils.getCurrentUser();
+		boolean isAdmin = currentUser.getRoles().stream().anyMatch(r -> "Admin".equals(r.getCode()));
+		if (currentUser != null && isAdmin) {
+			tabs = new Tab[] { createTab("Потребители", UserView.class), createTab("Коментари", CommentsView.class) };
+		} else {
+			tabs = new Tab[] { createTab("Коментари", CommentsView.class) };
+		}
+		return tabs;
 	}
 
 	private static Tab createTab(String text, Class<? extends Component> navigationTarget) {

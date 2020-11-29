@@ -23,7 +23,6 @@ import uni.fmi.masters.vaadin.ui.MainView;
 
 @Route(value = "users", layout = MainView.class)
 @PageTitle("Users")
-@RouteAlias(value = "", layout = MainView.class)
 public class UserView extends Div {
 	private static final long serialVersionUID = 1L;
 	private Grid<UserBean> grid = new Grid<>(UserBean.class, false);
