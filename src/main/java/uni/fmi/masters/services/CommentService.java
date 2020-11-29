@@ -1,5 +1,7 @@
 package uni.fmi.masters.services;
 
+import java.util.Collection;
+
 import org.springframework.stereotype.Service;
 
 import uni.fmi.masters.models.CommentBean;
@@ -15,5 +17,10 @@ public class CommentService {
 	
 	public CommentBean findById(long id) {
 		return commentRepo.findById(id).orElse(null);
+	}
+
+	public Collection<CommentBean> findAll() {
+		// TODO Auto-generated method stub
+		return commentRepo.findAll();
 	}
 }

@@ -1,4 +1,4 @@
-package uni.fmi.masters.vaadin.ui;
+package uni.fmi.masters.vaadin.ui.user;
 
 import java.util.Collection;
 
@@ -13,13 +13,18 @@ import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.selection.SingleSelect;
+import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RouteAlias;
 
 import uni.fmi.masters.models.UserBean;
 import uni.fmi.masters.services.UserService;
+import uni.fmi.masters.vaadin.ui.MainView;
 
-@Route("")
-public class MainUI extends Div {
+@Route(value = "users", layout = MainView.class)
+@PageTitle("Users")
+@RouteAlias(value = "", layout = MainView.class)
+public class UserView extends Div {
 	private static final long serialVersionUID = 1L;
 	private Grid<UserBean> grid = new Grid<>(UserBean.class, false);
 	private UserService userService;
@@ -28,7 +33,7 @@ public class MainUI extends Div {
 	final Button removeUserButton = new Button("Изтрий");
 	private Button newUserButton;
 
-	public MainUI(UserService userService) {
+	public UserView(UserService userService) {
 		this.userService = userService;
 		setSizeFull();
 		configureGrid();
@@ -38,20 +43,37 @@ public class MainUI extends Div {
 		Collection<UserBean> users = userService.findAll();
 		updateGrid(users);
 	}
-	
 
 	private HorizontalLayout createActionButtons() {
 		newUserButton = new Button("Нов Потребител");
 		newUserButton.addClickListener(l -> {
 			Dialog dialog = new Dialog();
-			dialog.add(new UserForm());
+			UserForm userForm = new UserForm(userService);
+			userForm.addOKClickListener(l1 -> {
+				if (userForm.isValid()) {
+					dialog.close();
+					Collection<UserBean> users = userService.findAll();
+					updateGrid(users);
+				}
+			});
+			userForm.addCloseClickListener(l1 -> dialog.close());
+			dialog.add(userForm);
 			dialog.open();
 		});
 
 		editUserButton.setEnabled(false);
 		editUserButton.addClickListener(listener -> {
 			Dialog dialog = new Dialog();
-			dialog.add(new UserForm(selectedUser));
+			UserForm userForm = new UserForm(userService, selectedUser);
+			userForm.addOKClickListener(l1 -> {
+				if (userForm.isValid()) {
+					dialog.close();
+					Collection<UserBean> users = userService.findAll();
+					updateGrid(users);
+				}
+			});
+			userForm.addCloseClickListener(l1 -> dialog.close());
+			dialog.add(userForm);
 			dialog.open();
 		});
 		removeUserButton.setEnabled(false);
@@ -61,9 +83,11 @@ public class MainUI extends Div {
 			final Button yesButton = new Button("ДА", l -> {
 				userService.remove(selectedUser);
 				dialog.close();
+				Collection<UserBean> users = userService.findAll();
+				updateGrid(users);
 			});
 
-			Button notButton = new Button("не", l -> dialog.close());
+			Button notButton = new Button("НЕ", l -> dialog.close());
 			dialog.add(new HorizontalLayout(yesButton, notButton));
 			dialog.open();
 		});
